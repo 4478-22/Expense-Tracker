@@ -32,7 +32,10 @@ export function useAuth() {
       email, 
       password,
       options: {
-        emailRedirectTo: undefined
+        emailRedirectTo: undefined,
+        data: {
+          email_confirm: false
+        }
       }
     });
     return { error };
