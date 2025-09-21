@@ -28,23 +28,13 @@ export function useAuth() {
   };
 
   const signUp = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({ 
+    const { error } = await supabase.auth.signUp({ 
       email, 
       password,
       options: {
         emailRedirectTo: undefined,
-        data: {
-          email_confirm: false
-        }
       }
     });
-    
-    // If sign up was successful and no email confirmation is required, 
-    // the user should be automatically signed in
-    if (!error && data.user && !data.user.email_confirmed_at) {
-      // The user is already signed in after successful signup when email confirmation is disabled
-      setUser({ id: data.user.id, email: data.user.email! });
-    }
     
     return { error };
   };
