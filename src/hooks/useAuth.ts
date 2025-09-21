@@ -28,8 +28,11 @@ export function useAuth() {
   };
 
   const signUp = async (email: string, password: string) => {
+    // Trim whitespace and convert to lowercase
+    const cleanEmail = email.trim().toLowerCase();
+    
     const { error } = await supabase.auth.signUp({ 
-      email, 
+      email: cleanEmail, 
       password,
       options: {
         emailRedirectTo: undefined,

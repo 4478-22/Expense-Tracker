@@ -18,12 +18,34 @@ export function AuthForm({ onSignIn, onSignUp }: AuthFormProps) {
     setLoading(true);
     setError(null);
 
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      setLoading(false);
+      return;
+    }
     const { error } = isSignUp 
       ? await onSignUp(email, password)
       : await onSignIn(email, password);
 
     if (error) {
-      setError(error.message);
+      // Provide more user-friendly error messages
+      if (error.message.includes('email_address_invalid')) {
+        setError('Please enter a valid email address');
+      } else if (error.message.includes('weak_password')) {
+        setError('Password is too weak. Please use at least 6 characters');
+      } else if (error.message.includes('user_already_exists')) {
+        setError('An account with this email already exists. Please sign in instead.');
+      } else {
+        setError(error.message);
+      }
     }
     setLoading(false);
   };
