@@ -31,13 +31,18 @@ export function useAuth() {
     // Trim whitespace and convert to lowercase
     const cleanEmail = email.trim().toLowerCase();
     
-    const { error } = await supabase.auth.signUp({ 
+    const { data, error } = await supabase.auth.signUp({ 
       email: cleanEmail, 
       password,
       options: {
         emailRedirectTo: undefined,
       }
     });
+    
+    // If signup is successful and user is immediately available, set the user state
+    if (!error && data.user && data.session) {
+      setUser({ id: data.user.id, email: data.user.email! });
+    }
     
     return { error };
   };

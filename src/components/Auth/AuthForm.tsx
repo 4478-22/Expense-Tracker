@@ -46,6 +46,10 @@ export function AuthForm({ onSignIn, onSignUp }: AuthFormProps) {
       } else {
         setError(error.message);
       }
+    } else if (isSignUp) {
+      // Clear form on successful signup
+      setEmail('');
+      setPassword('');
     }
     setLoading(false);
   };
