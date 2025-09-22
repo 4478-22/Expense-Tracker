@@ -31,6 +31,7 @@ export function AuthForm({ onSignIn, onSignUp }: AuthFormProps) {
       setLoading(false);
       return;
     }
+
     const { error } = isSignUp 
       ? await onSignUp(email, password)
       : await onSignIn(email, password);
@@ -43,13 +44,17 @@ export function AuthForm({ onSignIn, onSignUp }: AuthFormProps) {
         setError('Password is too weak. Please use at least 6 characters');
       } else if (error.message.includes('user_already_exists')) {
         setError('An account with this email already exists. Please sign in instead.');
+      } else if (error.message.includes('Invalid login credentials')) {
+        setError('Invalid email or password. Please check your credentials and try again.');
       } else {
         setError(error.message);
       }
-    } else if (isSignUp) {
-      // Clear form on successful signup
-      setEmail('');
-      setPassword('');
+    } else {
+      // Clear form on successful authentication
+      if (isSignUp) {
+        setEmail('');
+        setPassword('');
+      }
     }
     setLoading(false);
   };
