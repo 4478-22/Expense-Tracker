@@ -94,9 +94,25 @@ export function useAuth() {
   };
 
   const signUp = async (email: string, password: string) => {
+    console.log('🔍 SignUp Debug - Starting signup process');
+    console.log('📧 Original email:', email);
+    console.log('🔒 Password length:', password.length);
+    
     // Trim whitespace and convert to lowercase
     const cleanEmail = email.trim().toLowerCase();
+    console.log('✨ Cleaned email:', cleanEmail);
     
+    // Additional email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isValidEmail = emailRegex.test(cleanEmail);
+    console.log('✅ Email regex validation:', isValidEmail);
+    
+    if (!isValidEmail) {
+      console.error('❌ Email failed regex validation');
+      return { error: { message: 'Invalid email format' } };
+    }
+    
+    console.log('🚀 Sending signup request to Supabase...');
     const { data, error } = await supabase.auth.signUp({ 
       email: cleanEmail, 
       password,
@@ -105,7 +121,17 @@ export function useAuth() {
       }
     });
     
+    console.log('📊 Supabase signup response:');
+    console.log('- Data:', data);
+    console.log('- Error:', error);
+    console.log('- User:', data?.user);
+    console.log('- Session:', data?.session);
+    
     if (!error && data.user) {
+      console.log('✅ Signup successful, user created');
+      console.log('👤 User ID:', data.user.id);
+      console.log('📧 User email:', data.user.email);
+      
       // Wait a moment for the trigger to create the user record
       setTimeout(async () => {
         const { data: userData, error: fetchError } = await supabase
@@ -114,19 +140,38 @@ export function useAuth() {
           .eq('id', data.user.id)
           .single();
         
+        console.log('🎫 Session exists, setting user immediately');
         if (!fetchError && userData) {
+        console.log('✅ User state updated successfully');
           setUser({ id: userData.id, email: userData.email });
+        console.log('⏳ No session yet, waiting for user record creation...');
         } else {
           // Fallback: create user record manually if trigger didn't work
+          console.log('🔍 Fetching user data from database...');
+            console.log('✅ User data found in database');
           const { error: insertError } = await supabase
             .from('users')
+            console.log('⚠️ User not found, creating manually...');
             .insert([{ id: data.user.id, email: data.user.email! }]);
           
+          console.log('📊 Database fetch result:');
+          console.log('- UserData:', userData);
+          console.log('- FetchError:', fetchError);
+            console.log('📊 Manual insert result:');
+            console.log('- InsertError:', insertError);
+            
+          
+              console.log('✅ User created manually');
           if (!insertError) {
             setUser({ id: data.user.id, email: data.user.email! });
           }
         }
       }, 1000);
+    } else if (error) {
+      console.error('❌ Signup failed with error:', error);
+      console.error('- Error code:', error.code);
+      console.error('- Error message:', error.message);
+      console.error('- Error details:', error.details);
     }
     
     return { error };

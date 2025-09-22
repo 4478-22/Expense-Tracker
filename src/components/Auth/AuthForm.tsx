@@ -15,43 +15,66 @@ export function AuthForm({ onSignIn, onSignUp }: AuthFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('🔍 AuthForm Debug - Form submission started');
+    console.log('📧 Email input:', email);
+    console.log('🔒 Password input length:', password.length);
+    console.log('🔄 Is signup mode:', isSignUp);
+    
     setLoading(true);
     setError(null);
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
+    const trimmedEmail = email.trim();
+    console.log('✨ Trimmed email:', trimmedEmail);
+    console.log('✅ Email regex test:', emailRegex.test(trimmedEmail));
+    
+    if (!emailRegex.test(trimmedEmail)) {
+      console.error('❌ Email validation failed');
       setError('Please enter a valid email address');
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
+      console.error('❌ Password too short');
       setError('Password must be at least 6 characters long');
       setLoading(false);
       return;
     }
 
+    console.log('🚀 Calling authentication function...');
     const { error } = isSignUp 
       ? await onSignUp(email, password)
       : await onSignIn(email, password);
 
+    console.log('📊 Authentication result:');
+    console.log('- Error:', error);
+    
     if (error) {
+      console.error('❌ Authentication failed:', error);
       // Provide more user-friendly error messages
       if (error.message.includes('email_address_invalid')) {
+        console.error('❌ Email address invalid error');
         setError('Please enter a valid email address');
       } else if (error.message.includes('weak_password')) {
+        console.error('❌ Weak password error');
         setError('Password is too weak. Please use at least 6 characters');
       } else if (error.message.includes('user_already_exists')) {
+        console.error('❌ User already exists error');
         setError('An account with this email already exists. Please sign in instead.');
       } else if (error.message.includes('Invalid login credentials')) {
+        console.error('❌ Invalid credentials error');
         setError('Invalid email or password. Please check your credentials and try again.');
       } else {
+        console.error('❌ Other error:', error.message);
         setError(error.message);
       }
     } else {
+      console.log('✅ Authentication successful!');
       // Clear form on successful authentication
       if (isSignUp) {
+        console.log('🧹 Clearing signup form');
         setEmail('');
         setPassword('');
       }
